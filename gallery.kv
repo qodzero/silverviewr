@@ -1,0 +1,157 @@
+#: import icon kivy.garden.iconfonts.icon
+#: import Window kivy.core.window.Window
+#: import Factory kivy.factory.Factory
+
+<About@ModalView>:
+    size_hint: (.7,.5)
+    Label:
+        text: '[b]Samuelworks PhotoViewr[/b]\n\nv0.01\n\n[b]Description: [/b]An Open Source Image Viewer Program\n\n[b]Creator/Maintainer: [/b]Samuel T Mthembo\n[color=#0000FF]Tawanda.samuelson@gmail.com[/color]\n\n[b]License: [/b]Apache 2.0'
+        markup: True
+        halign: 'center'
+        valign: 'middle'
+
+<ImgCard@ToggleButtonBehavior+BoxLayout>:
+    im_source: ''
+    im_caption: ''
+    orientation: 'vertical'
+    on_release: app.root.viewimg(self)
+    Image:
+        source: root.im_source
+        size_hint_y: .9
+    Label:
+        text: root.im_caption
+        size_hint_y: .1
+<FlatButton@ButtonBehavior+Label>:
+    color: (0,0,0, 1)        
+
+<GalleryWindow>:
+    id: main_win
+    orientation: 'vertical'
+    file_dropdown: file_dropdown.__self__
+    more_dropdown: more_dropdown.__self__
+
+    ScreenManager:
+        id: scrn_mngr
+        Screen:
+            id: scrn_media
+            name: 'scrn_media'
+            BoxLayout:
+                id: main_media
+                orientation: 'vertical'
+                BoxLayout:
+                    id: top_nav
+                    size_hint_y: None
+                    height: 35
+                    canvas.before:
+                        Color:
+                            rgba: (1,1,1, 1)
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
+
+                    FlatButton:
+                        id: file_trigger
+                        text: 'File'
+                        size_hint: (.2,None)
+                        height: 30
+                        on_release: file_dropdown.open(self)
+
+                        Widget:
+                            on_parent: file_dropdown.dismiss()
+
+                            DropDown:
+                                id: file_dropdown
+                                spacing: 4
+                                Button:
+                                    id: open_file
+                                    text: 'Open Image'
+                                    markup: True
+                                    size_hint_y: None
+                                    height: 30
+                                    on_release: scrn_mngr.current = 'scrn_open'
+                                    on_release: scrn_open.trigger = 'image'
+                                    background_normal: ''
+                                    background_color: (.4,.4,.4, .7)
+                                Button:
+                                    id: open_folder
+                                    text: '%s'%(icon('zmdi-folder-outline',32))
+                                    markup: True
+                                    size_hint_y: None
+                                    height: 30
+                                    background_normal: ''
+                                    background_color: (.4,.4,.4, .7)
+                                    on_release: scrn_mngr.current = 'scrn_open'
+                    Label:
+                        id: title
+                        text: 'Samuelworks PhotoViewr'
+                        color: (0,0,0, 1)
+                        size_hint: (.6,None)
+                        height: 30
+                        bold: True
+                    FlatButton:
+                        id: more_trigger
+                        text: '%s'%(icon('zmdi-more-vert',32))
+                        markup: True
+                        size_hint: (.2,None)
+                        height: 30
+                        on_release: more_dropdown.open(self)
+
+                        Widget:
+                            on_parent: more_dropdown.dismiss()
+
+                            DropDown:
+                                id: more_dropdown
+                                spacing: 4
+                                Button:
+                                    id: open_about
+                                    text: 'About'
+                                    size_hint_y: None
+                                    height: 30
+                                    background_normal: ''
+                                    background_color: (.4,.4,.4, .7)
+                                    on_release: Factory.About().open(self)
+                                Button:
+                                    id: quit
+                                    text: 'Quit'
+                                    size_hint_y: None
+                                    height: 30
+                                    background_normal: ''
+                                    background_color: (.4,.4,.4, .7)
+                                    on_release:Window.close()
+                RecycleView:
+                    id: img_base
+                    viewclass: 'ImgCard'
+                    canvas.before:
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
+                            source: 'assets/login_wall.png'
+                    RecycleGridLayout:
+                        default_size: (None,250)
+                        default_size_hint: (1,None)
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: 10
+                        # orientation: 'vertical'
+                        cols: 4
+        Screen:
+            id: scrn_open
+            name: 'scrn_open'
+            trigger: ''
+
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_y: None
+                    height: 35
+                    TextInput:
+                        id: current_path
+                        text: chooser.selection[0] if scrn_open.trigger == 'image' and len(chooser.selection) > 0 else chooser.path
+                        size_hint_x: .8
+                    Button:
+                        id: submit
+                        text: 'Open...'
+                        size_hint_x: .2
+                        on_release: root.get_image(current_path.text) if scrn_open.trigger == 'image' else root.get_folder(current_path.text)
+                FileChooserIconView:
+                    id: chooser
